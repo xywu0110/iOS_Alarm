@@ -12,7 +12,12 @@
 		9412E2732B24D2730094A161 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9412E2722B24D2730094A161 /* Assets.xcassets */; };
 		9412E2762B24D2730094A161 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9412E2742B24D2730094A161 /* LaunchScreen.storyboard */; };
 		9412E2792B24D2730094A161 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 9412E2782B24D2730094A161 /* main.m */; };
-		943A5AA62B26078C0035685A /* MainPageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 943A5AA52B26078C0035685A /* MainPageViewController.m */; };
+		94D100352B349C1900374129 /* AlarmViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 94D100342B349C1900374129 /* AlarmViewController.m */; };
+		94D100392B349C6200374129 /* StopWatchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 94D100382B349C6200374129 /* StopWatchViewController.m */; };
+		94D1004B2B3B238600374129 /* AddAlarmViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 94D1004A2B3B238600374129 /* AddAlarmViewController.m */; };
+		94D1004D2B3C927B00374129 /* utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 94D1004C2B3C927B00374129 /* utils.m */; };
+		94D100502B42B85200374129 /* AlarmInfoArray.m in Sources */ = {isa = PBXBuildFile; fileRef = 94D1004F2B42B85200374129 /* AlarmInfoArray.m */; };
+		94D100542B43052D00374129 /* AlarmItemCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 94D100532B43052D00374129 /* AlarmItemCell.m */; };
 		BCC1C4FDE1E04D155CB2CD85 /* Pods_alarm_OC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0819D1AD69BEDBF20AE24F7A /* Pods_alarm_OC.framework */; };
 /* End PBXBuildFile section */
 
@@ -28,8 +33,18 @@
 		9412E2752B24D2730094A161 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9412E2772B24D2730094A161 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9412E2782B24D2730094A161 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		943A5AA42B26078C0035685A /* MainPageViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainPageViewController.h; sourceTree = "<group>"; };
-		943A5AA52B26078C0035685A /* MainPageViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MainPageViewController.m; sourceTree = "<group>"; };
+		94D100332B349C1900374129 /* AlarmViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AlarmViewController.h; sourceTree = "<group>"; };
+		94D100342B349C1900374129 /* AlarmViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AlarmViewController.m; sourceTree = "<group>"; };
+		94D100372B349C6200374129 /* StopWatchViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StopWatchViewController.h; sourceTree = "<group>"; };
+		94D100382B349C6200374129 /* StopWatchViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StopWatchViewController.m; sourceTree = "<group>"; };
+		94D100452B39E3DB00374129 /* utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
+		94D100492B3B238600374129 /* AddAlarmViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddAlarmViewController.h; sourceTree = "<group>"; };
+		94D1004A2B3B238600374129 /* AddAlarmViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddAlarmViewController.m; sourceTree = "<group>"; };
+		94D1004C2B3C927B00374129 /* utils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = utils.m; sourceTree = "<group>"; };
+		94D1004E2B42B85200374129 /* AlarmInfoArray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AlarmInfoArray.h; sourceTree = "<group>"; };
+		94D1004F2B42B85200374129 /* AlarmInfoArray.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AlarmInfoArray.m; sourceTree = "<group>"; };
+		94D100522B43052D00374129 /* AlarmItemCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AlarmItemCell.h; sourceTree = "<group>"; };
+		94D100532B43052D00374129 /* AlarmItemCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AlarmItemCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +80,9 @@
 		9412E2652B24D2720094A161 /* alarm_OC */ = {
 			isa = PBXGroup;
 			children = (
+				94D100402B39E0CD00374129 /* utils */,
+				94D1003A2B349F5500374129 /* cell */,
+				94D100322B349B4100374129 /* viewController */,
 				9412E2662B24D2720094A161 /* AppDelegate.h */,
 				9412E2672B24D2720094A161 /* AppDelegate.m */,
 				9412E26F2B24D2720094A161 /* Main.storyboard */,
@@ -72,10 +90,41 @@
 				9412E2742B24D2730094A161 /* LaunchScreen.storyboard */,
 				9412E2772B24D2730094A161 /* Info.plist */,
 				9412E2782B24D2730094A161 /* main.m */,
-				943A5AA42B26078C0035685A /* MainPageViewController.h */,
-				943A5AA52B26078C0035685A /* MainPageViewController.m */,
 			);
 			path = alarm_OC;
+			sourceTree = "<group>";
+		};
+		94D100322B349B4100374129 /* viewController */ = {
+			isa = PBXGroup;
+			children = (
+				94D100332B349C1900374129 /* AlarmViewController.h */,
+				94D100342B349C1900374129 /* AlarmViewController.m */,
+				94D100372B349C6200374129 /* StopWatchViewController.h */,
+				94D100382B349C6200374129 /* StopWatchViewController.m */,
+				94D100492B3B238600374129 /* AddAlarmViewController.h */,
+				94D1004A2B3B238600374129 /* AddAlarmViewController.m */,
+			);
+			path = viewController;
+			sourceTree = "<group>";
+		};
+		94D1003A2B349F5500374129 /* cell */ = {
+			isa = PBXGroup;
+			children = (
+				94D100522B43052D00374129 /* AlarmItemCell.h */,
+				94D100532B43052D00374129 /* AlarmItemCell.m */,
+			);
+			path = cell;
+			sourceTree = "<group>";
+		};
+		94D100402B39E0CD00374129 /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				94D100452B39E3DB00374129 /* utils.h */,
+				94D1004C2B3C927B00374129 /* utils.m */,
+				94D1004E2B42B85200374129 /* AlarmInfoArray.h */,
+				94D1004F2B42B85200374129 /* AlarmInfoArray.m */,
+			);
+			path = utils;
 			sourceTree = "<group>";
 		};
 		98A86FDC7A2215B289BB0AEE /* Frameworks */ = {
@@ -209,8 +258,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				943A5AA62B26078C0035685A /* MainPageViewController.m in Sources */,
+				94D1004B2B3B238600374129 /* AddAlarmViewController.m in Sources */,
+				94D100352B349C1900374129 /* AlarmViewController.m in Sources */,
+				94D1004D2B3C927B00374129 /* utils.m in Sources */,
 				9412E2682B24D2720094A161 /* AppDelegate.m in Sources */,
+				94D100392B349C6200374129 /* StopWatchViewController.m in Sources */,
+				94D100502B42B85200374129 /* AlarmInfoArray.m in Sources */,
+				94D100542B43052D00374129 /* AlarmItemCell.m in Sources */,
 				9412E2792B24D2730094A161 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

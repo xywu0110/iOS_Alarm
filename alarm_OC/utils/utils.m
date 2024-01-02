@@ -7,6 +7,8 @@
 
 #import "utils.h"
 
+NSString *const ALARM_INFO_ARRAY = @"ALARM_INFO_ARRAY";
+
 UIImage *resizeImage(UIImage *image, CGSize imageSize) {
     UIGraphicsBeginImageContextWithOptions(imageSize, NO, 0.0);
     [image drawInRect:CGRectMake(0, 0, imageSize.width, imageSize.height)];
@@ -15,4 +17,8 @@ UIImage *resizeImage(UIImage *image, CGSize imageSize) {
     return resizedImage;
 }
 
-NSString *const ALARM_INFO_ARRAY = @"ALARM_INFO_ARRAY";
+UIView *setupSeparatorLine(void) {
+    UIView *separator = [[UIView alloc] init];
+    separator.backgroundColor = UIColorFromHexString(0x303030);
+    return separator;
+}

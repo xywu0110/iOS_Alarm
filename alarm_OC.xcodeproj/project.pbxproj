@@ -18,6 +18,7 @@
 		94D1004D2B3C927B00374129 /* utils.m in Sources */ = {isa = PBXBuildFile; fileRef = 94D1004C2B3C927B00374129 /* utils.m */; };
 		94D100502B42B85200374129 /* AlarmInfoArray.m in Sources */ = {isa = PBXBuildFile; fileRef = 94D1004F2B42B85200374129 /* AlarmInfoArray.m */; };
 		94D100542B43052D00374129 /* AlarmItemCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 94D100532B43052D00374129 /* AlarmItemCell.m */; };
+		94D100572B446C6400374129 /* AlarmTitleCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 94D100562B446C6400374129 /* AlarmTitleCell.m */; };
 		BCC1C4FDE1E04D155CB2CD85 /* Pods_alarm_OC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0819D1AD69BEDBF20AE24F7A /* Pods_alarm_OC.framework */; };
 /* End PBXBuildFile section */
 
@@ -45,6 +46,8 @@
 		94D1004F2B42B85200374129 /* AlarmInfoArray.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AlarmInfoArray.m; sourceTree = "<group>"; };
 		94D100522B43052D00374129 /* AlarmItemCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AlarmItemCell.h; sourceTree = "<group>"; };
 		94D100532B43052D00374129 /* AlarmItemCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AlarmItemCell.m; sourceTree = "<group>"; };
+		94D100552B446C6400374129 /* AlarmTitleCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AlarmTitleCell.h; sourceTree = "<group>"; };
+		94D100562B446C6400374129 /* AlarmTitleCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AlarmTitleCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +115,8 @@
 			children = (
 				94D100522B43052D00374129 /* AlarmItemCell.h */,
 				94D100532B43052D00374129 /* AlarmItemCell.m */,
+				94D100552B446C6400374129 /* AlarmTitleCell.h */,
+				94D100562B446C6400374129 /* AlarmTitleCell.m */,
 			);
 			path = cell;
 			sourceTree = "<group>";
@@ -260,6 +265,7 @@
 			files = (
 				94D1004B2B3B238600374129 /* AddAlarmViewController.m in Sources */,
 				94D100352B349C1900374129 /* AlarmViewController.m in Sources */,
+				94D100572B446C6400374129 /* AlarmTitleCell.m in Sources */,
 				94D1004D2B3C927B00374129 /* utils.m in Sources */,
 				9412E2682B24D2720094A161 /* AppDelegate.m in Sources */,
 				94D100392B349C6200374129 /* StopWatchViewController.m in Sources */,

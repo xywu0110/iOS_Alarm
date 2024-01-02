@@ -8,8 +8,6 @@
 
 #include <UIKit/UIKit.h>
 
-UIImage *resizeImage(UIImage *image, CGSize imageSize);
-
 #ifndef UIColorFromHexString
 #define UIColorFromHexString(hex) [UIColor colorWithRed:((float)((hex & 0xFF0000) >> 16))/255.0 green:((float)((hex & 0xFF00) >> 8))/255.0 blue:((float)(hex & 0xFF))/255.0 alpha:1.0]
 #endif
@@ -19,3 +17,7 @@ UIImage *resizeImage(UIImage *image, CGSize imageSize);
 #endif
 
 extern NSString *const ALARM_INFO_ARRAY;
+
+UIImage *resizeImage(UIImage *image, CGSize imageSize);
+
+UIView *setupSeparatorLine(void);

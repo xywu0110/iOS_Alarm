@@ -22,7 +22,7 @@
     UILabel *label = [[UILabel alloc] init];
     NSString *hour = [info[@"hour"] stringValue];
     NSString *minute = [info[@"minute"] stringValue];
-    label.text = (isValidStr(hour) && isValidStr(minute)) ? [NSString stringWithFormat:@"%@ : %@", hour, minute] : @"";
+    label.text = [self formatTimeStringWithHour:hour Minute:minute];
     label.font = [UIFont systemFontOfSize:18];
     label.textColor = [UIColor whiteColor];
     [label sizeToFit];
@@ -32,19 +32,22 @@
         make.left.mas_equalTo(self.contentView).offset(10);
     }];
     
-    UIView *separatorLine = [self setupSeparatorLine];
+    UIView *separatorLine = setupSeparatorLine();
     [self.contentView addSubview:separatorLine];
     [separatorLine mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.mas_equalTo(self.contentView);
         make.height.mas_equalTo(1);
-        make.top.mas_equalTo(label.mas_bottom).offset(-1);
+        make.top.mas_equalTo(self.contentView.mas_bottom).offset(-1);
     }];
 }
 
-- (UIView *)setupSeparatorLine {
-    UIView *separator = [[UIView alloc] init];
-    separator.backgroundColor = UIColorFromHexString(0x303030);
-    return separator;
+- (NSString *)formatTimeStringWithHour:(NSString *)hour Minute:(NSString *)minute {
+    if (!isValidStr(hour) || !isValidStr(minute)) {
+        return @"";
+    }
+    NSString *hourPart = [hour length] > 1 ? hour : [@"0" stringByAppendingString:hour];
+    NSString *minutePart = [minute length] > 1 ? minute : [@"0" stringByAppendingString:minute];
+    return [NSString stringWithFormat:@"%@ : %@", hourPart, minutePart];
 }
 
 @end

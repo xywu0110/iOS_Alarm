@@ -8,6 +8,7 @@
 #import "AlarmViewController.h"
 #import "AddAlarmViewController.h"
 #import "utils.h"
+#import "AlarmTitleCell.h"
 #import "AlarmItemCell.h"
 #import "AlarmInfoArray.h"
 #import <Masonry/Masonry.h>
@@ -31,11 +32,6 @@
     [self setupUI];
 }
 
-- (void)viewDidLayoutSubviews {
-    [super viewDidLayoutSubviews];
-    [self.collectionView.collectionViewLayout invalidateLayout];
-}
-
 // MARK: UI
 - (void)setupUI {
     self.view.backgroundColor = [UIColor blackColor];
@@ -54,7 +50,7 @@
         make.top.mas_equalTo(self.view.mas_safeAreaLayoutGuideTop);
         make.left.right.bottom.mas_equalTo(self.view);
     }];
-    // todo
+    [self.collectionView registerClass:[AlarmTitleCell class] forCellWithReuseIdentifier:@"alarmTitleCell"];
     [self.collectionView registerClass:[AlarmItemCell class] forCellWithReuseIdentifier:@"alarmItemCell"];
 }
 
@@ -80,7 +76,7 @@
 
 - (void)dismissModalVC {
     [self dismissViewControllerAnimated:YES completion:nil];
-    [self.collectionView reloadData];
+    [self.collectionView reloadData];   // todo: cells got polluted
 }
 
 - (NSDictionary *)getAlarmInfoAtIndex:(NSInteger)index {
@@ -98,24 +94,25 @@
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     UICollectionViewCell *cell;
     NSInteger index = indexPath.item;
-//    if (index == 0) {
-//        cell = [[UICollectionViewCell alloc] init]; // todo
-//        cell.backgroundColor = [UIColor lightGrayColor];
-//    } else {
+    if (index == 0) {
+        AlarmTitleCell *titleCell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"alarmTitleCell" forIndexPath:indexPath];
+        [titleCell loadWithTitle:@"Alarms"];
+        cell = titleCell;
+    } else {
         AlarmItemCell *itemCell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"alarmItemCell" forIndexPath:indexPath];
         itemCell.delegate = self;
-        [itemCell loadWithData:[self getAlarmInfoAtIndex:index]];
+        [itemCell loadWithData:[self getAlarmInfoAtIndex:index-1]];
         cell = itemCell;
-//    }
+    }
     return cell;
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
     float screenWidth = [UIScreen mainScreen].bounds.size.width;
     if (indexPath.item == 0) {
-        return CGSizeMake(screenWidth, 50);
+        return CGSizeMake(screenWidth, 80);
     } else {
-        return CGSizeMake(screenWidth, 40);
+        return CGSizeMake(screenWidth, 60);
     }
 }
 

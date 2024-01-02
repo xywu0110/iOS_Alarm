@@ -81,6 +81,10 @@ static NSMutableArray *_infoArray = nil;
 + (NSMutableArray *)infoArray {
     if (!_infoArray) {
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        if (![defaults objectForKey:ALARM_INFO_ARRAY]) {
+            [defaults setObject:[NSArray new] forKey:ALARM_INFO_ARRAY];
+            [defaults synchronize];
+        }
         NSArray *array = [defaults objectForKey:ALARM_INFO_ARRAY];
         _infoArray = [array mutableCopy];
     }

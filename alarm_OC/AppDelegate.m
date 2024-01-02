@@ -21,10 +21,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [self setupTabBar];
     [self.window makeKeyAndVisible];
-    
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:[NSArray new] forKey:ALARM_INFO_ARRAY];
-    [defaults synchronize];
+
     return YES;
 }
 

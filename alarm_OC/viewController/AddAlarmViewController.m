@@ -89,7 +89,7 @@
         make.height.mas_equalTo(40);
         make.top.mas_equalTo(self.configPanel.mas_top);
     }];
-    UIView *separatorLine1 = [self setupSeparatorLine];
+    UIView *separatorLine1 = setupSeparatorLine();
     [self.configPanel addSubview:separatorLine1];
     [separatorLine1 mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.mas_equalTo(self.configPanel);
@@ -103,7 +103,7 @@
         make.height.mas_equalTo(40);
         make.top.mas_equalTo(self.repeatSheet.mas_bottom);
     }];
-    UIView *separatorLine2 = [self setupSeparatorLine];
+    UIView *separatorLine2 = setupSeparatorLine();
     [self.configPanel addSubview:separatorLine2];
     [separatorLine2 mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.mas_equalTo(self.configPanel);
@@ -117,7 +117,7 @@
         make.height.mas_equalTo(40);
         make.top.mas_equalTo(self.labelSheet.mas_bottom);
     }];
-    UIView *separatorLine3 = [self setupSeparatorLine];
+    UIView *separatorLine3 = setupSeparatorLine();
     [self.configPanel addSubview:separatorLine3];
     [separatorLine3 mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.mas_equalTo(self.configPanel);
@@ -131,12 +131,6 @@
         make.height.mas_equalTo(40);
         make.top.mas_equalTo(self.soundSheet.mas_bottom);
     }];
-}
-
-- (UIView *)setupSeparatorLine {
-    UIView *separator = [[UIView alloc] init];
-    separator.backgroundColor = UIColorFromHexString(0x303030);
-    return separator;
 }
 
 // MARK: event

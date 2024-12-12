@@ -9,20 +9,22 @@
 #import "utils.h"
 #import <Masonry/Masonry.h>
 
+@interface AlarmTitleCell ()
+
+@property (nonatomic, strong) UILabel *titleLabel;
+
+@end
+
 @implementation AlarmTitleCell
 
-- (void)loadWithTitle:(NSString *)title {
-    UILabel *label = [[UILabel alloc] init];
-    label.text = title;
-    label.font = [UIFont boldSystemFontOfSize:30];
-    label.textColor = [UIColor whiteColor];
-    [label sizeToFit];
-    [self.contentView addSubview:label];
-    [label mas_makeConstraints:^(MASConstraintMaker *make) {
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    [self.contentView addSubview:self.titleLabel];
+    [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerY.mas_equalTo(self.contentView.mas_centerY);
         make.left.mas_equalTo(self.contentView).offset(10);
     }];
-    
     UIView *separatorLine = setupSeparatorLine();
     [self.contentView addSubview:separatorLine];
     [separatorLine mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -30,6 +32,23 @@
         make.height.mas_equalTo(1);
         make.top.mas_equalTo(self.contentView.mas_bottom).offset(-1);
     }];
+    return self;
+}
+
+- (void)updateWithTitle:(NSString *)title
+{
+    self.titleLabel.text = title;
+    [self.titleLabel sizeToFit];
+}
+
+- (UILabel *)titleLabel
+{
+    if (!_titleLabel) {
+        _titleLabel = [[UILabel alloc] init];
+        _titleLabel.font = [UIFont boldSystemFontOfSize:30];
+        _titleLabel.textColor = [UIColor whiteColor];
+    }
+    return _titleLabel;
 }
 
 @end

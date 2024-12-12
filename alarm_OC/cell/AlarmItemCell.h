@@ -6,13 +6,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AlarmInfoArray.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol AlarmItemDelagate <NSObject>
 
-@optional
-- (void)dismissModalVC; // todo
+- (void)onTapSwitch:(NSInteger)index newState:(BOOL)isAlarmOn;
+- (void)onTapCell:(NSInteger)index;
 
 @end
 
@@ -21,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, weak) id<AlarmItemDelagate> delegate;
 
-- (void)loadWithData:(NSDictionary *)info;
+- (void)updateWithInfo:(AlarmInfo *)info index:(NSInteger)index;
 
 @end
 

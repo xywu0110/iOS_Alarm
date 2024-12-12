@@ -16,6 +16,14 @@
 #define isValidStr(str) (str && [str isKindOfClass:[NSString class]] && (((NSString *)str).length != 0))
 #endif
 
+#ifndef isValidHour
+#define isValidHour(hour) (hour >= 0 && hour <= 23)
+#endif
+
+#ifndef isValidMinute
+#define isValidMinute(minute) (minute >= 0 && minute <= 59)
+#endif
+
 extern NSString *const ALARM_INFO_ARRAY;
 
 UIImage *resizeImage(UIImage *image, CGSize imageSize);

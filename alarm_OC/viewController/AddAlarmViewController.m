@@ -7,7 +7,7 @@
 
 #import "AddAlarmViewController.h"
 #import "utils.h"
-#import "AlarmInfoArray.h"
+#import "AlarmNotificationManager.h"
 #import <Masonry/Masonry.h>
 
 @interface AddAlarmViewController () <UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate>
@@ -22,31 +22,36 @@
 @property (nonatomic, strong) UIButton *labelSheet;
 @property (nonatomic, strong) UIButton *soundSheet;
 @property (nonatomic, strong) UIButton *snoozeSheet;
+@property (nonatomic, strong) UIView *audioOutputModeSheet;
 @property (nonatomic, strong) UILabel *labelOption;
 @property (nonatomic, strong) UILabel *soundOption;
 @property (nonatomic, strong) UITextField *labelText;
 
-@property (nonatomic, strong) NSMutableDictionary *currentAlarmInfo;
+@property (nonatomic, strong) AlarmInfo *currentAlarmInfo;
+@property (nonatomic, assign) NSInteger currentIndex;
 
 @end
 
 @implementation AddAlarmViewController
 
 // MARK: lifecircle
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
     [self setupUI];
 }
 
 // MARK: UI
-- (void)setupUI {
+- (void)setupUI
+{
     self.view.backgroundColor = UIColorFromHexString(0x171717);
     [self setupTopBar];
     [self setupTimePickerView];
     [self setupConfigPanel];
 }
 
-- (void)setupTopBar {
+- (void)setupTopBar
+{
     [self.view addSubview:self.cancelButton];
     [self.cancelButton mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.mas_equalTo(self.view).offset(10);
@@ -66,7 +71,8 @@
     }];
 }
 
-- (void)setupTimePickerView {
+- (void)setupTimePickerView
+{
     [self.view addSubview:self.timePickerView];
     [self.timePickerView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.mas_equalTo(self.titleLabel.mas_bottom).offset(25);
@@ -74,11 +80,12 @@
     }];
 }
 
-- (void)setupConfigPanel {
+- (void)setupConfigPanel
+{
     [self.view addSubview:self.configPanel];
     [self.configPanel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.mas_equalTo(self.timePickerView.mas_bottom).offset(25);
-        make.height.mas_equalTo(160);
+        make.height.mas_equalTo(200);
         make.left.mas_equalTo(self.view.mas_left).offset(10);
         make.right.mas_equalTo(self.view.mas_right).offset(-10);
     }];
@@ -131,103 +138,115 @@
         make.height.mas_equalTo(40);
         make.top.mas_equalTo(self.soundSheet.mas_bottom);
     }];
+    UIView *separatorLine4 = setupSeparatorLine();
+    [self.configPanel addSubview:separatorLine4];
+    [separatorLine4 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(self.configPanel);
+        make.height.mas_equalTo(1);
+        make.top.mas_equalTo(self.snoozeSheet.mas_bottom).offset(-1);
+    }];
+    
+    [self.configPanel addSubview:self.audioOutputModeSheet];
+    [self.audioOutputModeSheet mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.mas_equalTo(self.configPanel);
+        make.height.mas_equalTo(40);
+        make.top.mas_equalTo(self.snoozeSheet.mas_bottom);
+    }];
 }
 
 // MARK: event
-- (void)onClickCancel {
+- (void)onClickCancel
+{
     if (self.delegate && [self.delegate respondsToSelector:@selector(dismissModalVC)]) {
         [self.delegate dismissModalVC];
     }
 }
 
-- (void)onClickSave {
-    if (self.currentAlarmInfo[@"index"]) {
-        NSInteger index = [self.currentAlarmInfo[@"index"] integerValue];
-        [self.currentAlarmInfo removeObjectForKey:@"index"];
-        [AlarmInfoArray replaceAlarmAtIndex:index withNewInfo:[self.currentAlarmInfo copy]];
+- (void)onClickSave
+{
+    self.currentAlarmInfo.isEnabled = YES;
+    if (self.currentAlarmInfo.isUnsaved) {
+        [[AlarmInfoArray sharedArrray] addAlarm:self.currentAlarmInfo];
     } else {
-        [AlarmInfoArray addAlarm:[self.currentAlarmInfo copy]];
+        [[AlarmInfoArray sharedArrray] replaceAlarmAtIndex:self.currentIndex withNewInfo:self.currentAlarmInfo];
     }
+    [[AlarmNotificationManager defaultManager] scheduleAlarmNotification:self.currentAlarmInfo];
     
     if (self.delegate && [self.delegate respondsToSelector:@selector(dismissModalVC)]) {
         [self.delegate dismissModalVC];
     }
 }
 
-//- (void)updatePersistenceStore {
-//    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-//    [defaults setObject:[self.alarmInfoArray copy] forKey:ALARM_INFO_ARRAY];
-//    [defaults synchronize];
-//}
-
-- (void)onClickRepeat {
+- (void)onClickRepeat
+{
     // todo
     NSLog(@"clicked repeat");
 }
 
-- (void)onClickSound {
+- (void)onClickSound
+{
     // todo
 }
 
-- (void)buttonTouchDown:(UIButton *)sender {
+- (void)buttonTouchDown:(UIButton *)sender
+{
     sender.backgroundColor = UIColorFromHexString(0x303030);
 }
 
-- (void)buttonTouchUp:(UIButton *)sender {
+- (void)buttonTouchUp:(UIButton *)sender
+{
     sender.backgroundColor = [UIColor clearColor];
 }
 
-- (void)textFieldDidChange:(UITextField *)textField {
-    self.currentAlarmInfo[@"label"] = textField.text ? : @"";
+- (void)textFieldDidChange:(UITextField *)textField
+{
+    self.currentAlarmInfo.label = textField.text ? : @"";
 }
 
-- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
     [textField resignFirstResponder];
     return YES;
 }
 
-- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
     [self.view endEditing:YES];
 }
 
-- (void)showAlarmConfigWithCurrentTime {
-    NSDate *currentDate = [NSDate date];
-    NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSDateComponents *components = [calendar components:(NSCalendarUnitHour | NSCalendarUnitMinute) fromDate:currentDate];
-    NSDictionary *alarmInfo = @{
-        @"hour": @([components hour]),
-        @"minute": @([components minute])
-    };
-    [self showAlarmConfigWithInfo:alarmInfo];
+- (void)showAlarmConfigWithCurrentTime
+{
+    AlarmInfo *alarmInfo = [[AlarmInfo alloc] initWithCurrentTime];
+    [self showAlarmConfigWithInfo:alarmInfo atIndex:-1];
 }
 
-- (void)showAlarmConfigWithInfo:(NSDictionary *)info {
-    if (!info[@"hour"] || !info[@"minute"]) {
+- (void)showAlarmConfigWithInfo:(AlarmInfo *)info atIndex:(NSInteger)index
+{
+    if (!info) {
         [self showAlarmConfigWithCurrentTime];
         return;
     }
-    NSMutableDictionary *currentInfo = [info mutableCopy];
-    currentInfo[@"repeat"] = currentInfo[@"repeat"] ? : @[@(NO), @(NO), @(NO), @(NO), @(NO), @(NO), @(NO)];
-    currentInfo[@"label"] = currentInfo[@"label"] ? : @"";
-    currentInfo[@"sound"] = currentInfo[@"sound"] ? : @(0);
-    currentInfo[@"snooze"] = currentInfo[@"snooze"] ? : @(NO);
+    AlarmInfo *currentInfo = [info mutableCopy];
     self.currentAlarmInfo = currentInfo;
+    self.currentIndex = index;
     
-    [self.timePickerView selectRow:[currentInfo[@"hour"] integerValue] inComponent:0 animated:NO];
-    [self.timePickerView selectRow:[currentInfo[@"minute"] integerValue] inComponent:1 animated:NO];
-    // todo
+    [self.timePickerView selectRow:currentInfo.hour inComponent:0 animated:NO];
+    [self.timePickerView selectRow:currentInfo.minute inComponent:1 animated:NO];
 }
 
 // MARK: delegate
-- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView {
+- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView 
+{
     return 2;
 }
 
-- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component {
+- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component 
+{
     return component == 0 ? 24 : 60;
 }
 
-- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component {
+- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component 
+{
     if (row < 10) {
         return [NSString stringWithFormat: @"0%ld", (long)row];
     } else {
@@ -235,7 +254,8 @@
     }
 }
 
-- (UIView *)pickerView:(UIPickerView *)pickerView viewForRow:(NSInteger)row forComponent:(NSInteger)component reusingView:(UIView *)view {
+- (UIView *)pickerView:(UIPickerView *)pickerView viewForRow:(NSInteger)row forComponent:(NSInteger)component reusingView:(UIView *)view 
+{
     UILabel *newView = (UILabel *)view;
     if (newView == nil) {
         newView = [[UILabel alloc] init];
@@ -248,11 +268,12 @@
     return newView;
 }
 
-- (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component {
+- (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
+{
     if (component == 0) {
-        self.currentAlarmInfo[@"hour"] = @(row);
+        self.currentAlarmInfo.hour = row;
     } else {
-        self.currentAlarmInfo[@"minute"] = @(row);
+        self.currentAlarmInfo.minute = row;
     }
     UIView *view = [pickerView viewForRow:row forComponent:component];
     view.backgroundColor = [UIColor lightGrayColor];
@@ -260,7 +281,8 @@
 }
 
 // MARK: getter
-- (UIButton *)cancelButton {
+- (UIButton *)cancelButton
+{
     if (!_cancelButton) {
         NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:@"Cancel"];
         [attributedString addAttribute:NSForegroundColorAttributeName value:UIColorFromHexString(0xFFA500) range:NSMakeRange(0, attributedString.length)];
@@ -273,7 +295,8 @@
     return _cancelButton;
 }
 
-- (UIButton *)saveButton {
+- (UIButton *)saveButton
+{
     if (!_saveButton) {
         NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:@"Save"];
         [attributedString addAttribute:NSForegroundColorAttributeName value:UIColorFromHexString(0xFFA500) range:NSMakeRange(0, attributedString.length)];
@@ -286,7 +309,8 @@
     return _saveButton;
 }
 
-- (UILabel *)titleLabel {
+- (UILabel *)titleLabel
+{
     if (!_titleLabel) {
         NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:@"Add Alarm"];
         [attributedString addAttribute:NSForegroundColorAttributeName value:[UIColor whiteColor] range:NSMakeRange(0, attributedString.length)];
@@ -300,7 +324,8 @@
     return _titleLabel;
 }
 
-- (UIPickerView *)timePickerView {
+- (UIPickerView *)timePickerView
+{
     if (!_timePickerView) {
         _timePickerView = [[UIPickerView alloc] init];
         _timePickerView.dataSource = self;
@@ -310,7 +335,8 @@
     return _timePickerView;
 }
 
-- (UIView *)configPanel {
+- (UIView *)configPanel
+{
     if (!_configPanel) {
         _configPanel = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 200, 160)];
         _configPanel.backgroundColor = UIColorFromHexString(0x222222);
@@ -320,13 +346,14 @@
     return _configPanel;
 }
 
-- (UIButton *)repeatSheet {
+- (UIButton *)repeatSheet
+{
     if (!_repeatSheet) {
         _repeatSheet = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
         _repeatSheet.backgroundColor = [UIColor clearColor];
         [_repeatSheet addTarget:self action:@selector(onClickRepeat) forControlEvents:UIControlEventTouchUpInside];
         [_repeatSheet addTarget:self action:@selector(buttonTouchDown:) forControlEvents:UIControlEventTouchDown];
-        [_repeatSheet addTarget:self action:@selector(buttonTouchUp:) forControlEvents:UIControlEventTouchUpInside];
+        [_repeatSheet addTarget:self action:@selector(buttonTouchUp:) forControlEvents:(UIControlEventTouchUpInside|UIControlEventTouchCancel)];
         
         UILabel *title = [[UILabel alloc] init];
         title.backgroundColor = [UIColor clearColor];
@@ -345,7 +372,7 @@
         option.backgroundColor = [UIColor clearColor];
         // todo: get from storage
         option.text = @"Never >";
-        option.textColor = [UIColor whiteColor];
+        option.textColor = [UIColor lightGrayColor];
         option.font = [UIFont systemFontOfSize:18];
         option.numberOfLines = 1;
         [option sizeToFit];
@@ -358,7 +385,8 @@
     return _repeatSheet;
 }
 
-- (UIButton *)labelSheet {
+- (UIButton *)labelSheet
+{
     if (!_labelSheet) {
         _labelSheet = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
         _labelSheet.backgroundColor = [UIColor clearColor];
@@ -379,14 +407,13 @@
         UITextField *textField = [[UITextField alloc] init];
         textField.delegate = self;
         [textField addTarget:self action:@selector(textFieldDidChange:) forControlEvents:UIControlEventEditingChanged];
-        UIColor *fontColor = [UIColor whiteColor];
         NSDictionary *attributes = @{
-            NSForegroundColorAttributeName: fontColor,
+            NSForegroundColorAttributeName: [UIColor lightGrayColor],
             NSFontAttributeName: [UIFont systemFontOfSize:18]
         };
-        NSString *defaultText = isValidStr(self.currentAlarmInfo[@"label"]) ? self.currentAlarmInfo[@"label"] : @"Alarm";
+        NSString *defaultText = self.currentAlarmInfo.label ? : @"Alarm";
         textField.attributedPlaceholder = [[NSAttributedString alloc] initWithString:defaultText attributes:attributes];
-        textField.textColor = fontColor;
+        textField.textColor = [UIColor whiteColor];
         textField.borderStyle = UITextBorderStyleNone;
         textField.keyboardType = UIKeyboardTypeDefault;
         textField.returnKeyType = UIReturnKeyDone;
@@ -404,13 +431,14 @@
     return _labelSheet;
 }
 
-- (UIButton *)soundSheet {
+- (UIButton *)soundSheet
+{
     if (!_soundSheet) {
         _soundSheet = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
         _soundSheet.backgroundColor = [UIColor clearColor];
         [_soundSheet addTarget:self action:@selector(onClickSound) forControlEvents:UIControlEventTouchUpInside];
         [_soundSheet addTarget:self action:@selector(buttonTouchDown:) forControlEvents:UIControlEventTouchDown];
-        [_soundSheet addTarget:self action:@selector(buttonTouchUp:) forControlEvents:UIControlEventTouchUpInside];
+        [_soundSheet addTarget:self action:@selector(buttonTouchUp:) forControlEvents:(UIControlEventTouchUpInside|UIControlEventTouchCancel)];
         
         UILabel *title = [[UILabel alloc] init];
         title.backgroundColor = [UIColor clearColor];
@@ -429,7 +457,7 @@
         option.backgroundColor = [UIColor clearColor];
         // todo: get from storage
         option.text = @"None >";
-        option.textColor = [UIColor whiteColor];
+        option.textColor = [UIColor lightGrayColor];
         option.font = [UIFont systemFontOfSize:18];
         option.numberOfLines = 1;
         [option sizeToFit];
@@ -442,7 +470,8 @@
     return _soundSheet;
 }
 
-- (UIButton *)snoozeSheet {
+- (UIButton *)snoozeSheet
+{
     if (!_snoozeSheet) {
         _snoozeSheet = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
         _snoozeSheet.backgroundColor = [UIColor clearColor];
@@ -464,16 +493,33 @@
     return _snoozeSheet;
 }
 
-- (NSMutableDictionary *)currentAlarmInfo {
-    if (!_currentAlarmInfo) {
-        _currentAlarmInfo = [[NSMutableDictionary alloc] initWithCapacity:6];
-        _currentAlarmInfo[@"hour"] = @(0);
-        _currentAlarmInfo[@"minute"] = @(0);
-        _currentAlarmInfo[@"repeat"] = @[@(NO), @(NO), @(NO), @(NO), @(NO), @(NO), @(NO)];
-        _currentAlarmInfo[@"label"] = @"";
+- (UIView *)audioOutputModeSheet
+{
+    if (!_audioOutputModeSheet) {
+        _audioOutputModeSheet = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+        _audioOutputModeSheet.backgroundColor = [UIColor clearColor];
+        
+        UILabel *title = [[UILabel alloc] init];
+        title.backgroundColor = [UIColor clearColor];
+        title.text = @"Force Speaker Output";
+        title.textColor = [UIColor whiteColor];
+        title.font = [UIFont systemFontOfSize:18];
+        title.numberOfLines = 1;
+        [title sizeToFit];
+        [_audioOutputModeSheet addSubview:title];
+        [title mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.mas_equalTo(_audioOutputModeSheet.mas_left).offset(15);
+            make.centerY.mas_equalTo(_audioOutputModeSheet.mas_centerY);
+        }];
         // todo
-        _currentAlarmInfo[@"sound"] = @(0);
-        _currentAlarmInfo[@"snooze"] = @(NO);
+    }
+    return _audioOutputModeSheet;
+}
+
+- (AlarmInfo *)currentAlarmInfo
+{
+    if (!_currentAlarmInfo) {
+        _currentAlarmInfo = [[AlarmInfo alloc] initWithCurrentTime];
     }
     return _currentAlarmInfo;
 }

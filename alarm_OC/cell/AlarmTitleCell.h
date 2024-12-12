@@ -11,7 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface AlarmTitleCell : UICollectionViewCell
 
-- (void)loadWithTitle:(NSString *)title;
+- (void)updateWithTitle:(NSString *)title;
 
 @end
 

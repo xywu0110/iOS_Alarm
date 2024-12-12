@@ -27,97 +27,131 @@
 
 @implementation AlarmViewController
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
     [self setupUI];
 }
 
 // MARK: UI
-- (void)setupUI {
+- (void)setupUI
+{
     self.view.backgroundColor = [UIColor blackColor];
     [self setupNavigationBar];
     [self setupCollectionView];
 }
 
-- (void)setupNavigationBar {
+- (void)setupNavigationBar
+{
     self.navigationItem.leftBarButtonItem = self.editButton;
     self.navigationItem.rightBarButtonItem = self.moreButton;
 }
 
-- (void)setupCollectionView {
+- (void)setupCollectionView
+{
     [self.view addSubview:self.collectionView];
     [self.collectionView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.mas_equalTo(self.view.mas_safeAreaLayoutGuideTop);
         make.left.right.bottom.mas_equalTo(self.view);
     }];
+    
     [self.collectionView registerClass:[AlarmTitleCell class] forCellWithReuseIdentifier:@"alarmTitleCell"];
     [self.collectionView registerClass:[AlarmItemCell class] forCellWithReuseIdentifier:@"alarmItemCell"];
 }
 
 // MARK: event
-- (void)onClickEdit {
+- (void)onClickEdit
+{
     // todo
     self.view.backgroundColor = [UIColor greenColor];
 }
 
-- (void)onClickMore {
+- (void)onClickMore
+{
     [self showModalVCWithCurrentTime];
 }
 
-- (void)showModalVCWithCurrentTime {
+- (void)showModalVCWithCurrentTime
+{
     [self presentViewController:self.addAlarmVC animated:YES completion:nil];
     [self.addAlarmVC showAlarmConfigWithCurrentTime];
 }
 
-- (void)showModalVCWithAlarmInfo:(NSDictionary *)info {
+- (void)showModalVCWithAlarmInfo:(AlarmInfo *)info atIndex:(NSInteger)index
+{
     [self presentViewController:self.addAlarmVC animated:YES completion:nil];
-    [self.addAlarmVC showAlarmConfigWithInfo:info];
+    [self.addAlarmVC showAlarmConfigWithInfo:info atIndex:index];
 }
 
-- (void)dismissModalVC {
+- (void)onTapCell:(NSInteger)index
+{
+    AlarmInfo *alarmInfo = [[AlarmInfoArray sharedArrray] alarmAtIndex:index];
+    [self showModalVCWithAlarmInfo:alarmInfo atIndex:index];
+}
+
+- (void)onTapSwitch:(NSInteger)index newState:(BOOL)isAlarmActivated
+{
+    AlarmInfo *info = [[AlarmInfoArray sharedArrray] alarmAtIndex:index];
+    info.isEnabled = isAlarmActivated;
+    [[AlarmInfoArray sharedArrray] updatePersistenceStore];
+}
+
+- (void)dismissModalVC
+{
     [self dismissViewControllerAnimated:YES completion:nil];
-    [self.collectionView reloadData];   // todo: cells got polluted
+    [self.collectionView reloadData];
 }
 
-- (NSDictionary *)getAlarmInfoAtIndex:(NSInteger)index {
-    if (index < 0 || index >= [AlarmInfoArray count]) {
-        return @{};
+- (AlarmInfo *)getAlarmInfoAtIndex:(NSInteger)index
+{
+    if (index < 0 || index >= [[AlarmInfoArray sharedArrray] count]) {
+        return nil;
     }
-    return [AlarmInfoArray getInfoArray][index];
+    return [[AlarmInfoArray sharedArrray] alarmAtIndex:index];
 }
 
 // MARK: delegate
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return [AlarmInfoArray count] + 1;
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
+    return 2;
 }
 
-- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    return section == 0 ? 1 : [[AlarmInfoArray sharedArrray] count];
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
     UICollectionViewCell *cell;
-    NSInteger index = indexPath.item;
-    if (index == 0) {
+    NSInteger section = indexPath.section;
+    NSInteger item = indexPath.item;
+    if (section == 0) {
         AlarmTitleCell *titleCell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"alarmTitleCell" forIndexPath:indexPath];
-        [titleCell loadWithTitle:@"Alarms"];
+        [titleCell updateWithTitle:@"Alarms"];
         cell = titleCell;
     } else {
         AlarmItemCell *itemCell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"alarmItemCell" forIndexPath:indexPath];
         itemCell.delegate = self;
-        [itemCell loadWithData:[self getAlarmInfoAtIndex:index-1]];
+        [itemCell updateWithInfo:[self getAlarmInfoAtIndex:item] index:item];
         cell = itemCell;
     }
     return cell;
 }
 
-- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
     float screenWidth = [UIScreen mainScreen].bounds.size.width;
-    if (indexPath.item == 0) {
+    if (indexPath.section == 0) {
         return CGSizeMake(screenWidth, 80);
     } else {
-        return CGSizeMake(screenWidth, 60);
+        return CGSizeMake(screenWidth, 70);
     }
 }
 
 // MARK: getter
-- (AddAlarmViewController *)addAlarmVC {
+- (AddAlarmViewController *)addAlarmVC
+{
     if (!_addAlarmVC) {
         _addAlarmVC = [[AddAlarmViewController alloc] init];
         _addAlarmVC.modalPresentationStyle = UIModalPresentationPageSheet;
@@ -126,7 +160,8 @@
     return _addAlarmVC;
 }
 
-- (UIBarButtonItem *)editButton {
+- (UIBarButtonItem *)editButton
+{
     if (!_editButton) {
         NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:@"Edit"];
         [attributedString addAttribute:NSForegroundColorAttributeName value:UIColorFromHexString(0xFFA500) range:NSMakeRange(0, attributedString.length)];
@@ -140,7 +175,8 @@
     return _editButton;
 }
 
-- (UIBarButtonItem *)moreButton {
+- (UIBarButtonItem *)moreButton
+{
     if (!_moreButton) {
         UIImage *moreIcon = resizeImage([UIImage imageNamed:@"more"], CGSizeMake(23, 23));
         moreIcon = [moreIcon imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
@@ -149,7 +185,8 @@
     return _moreButton;
 }
 
-- (UICollectionView *)collectionView {
+- (UICollectionView *)collectionView
+{
     if (!_collectionView) {
         UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
         layout.scrollDirection = UICollectionViewScrollDirectionVertical;

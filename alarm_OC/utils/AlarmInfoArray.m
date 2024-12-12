@@ -8,91 +8,198 @@
 #import "AlarmInfoArray.h"
 #import "utils.h"
 
+@implementation AlarmInfo
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        self.isUnsaved = YES;
+        self.label = @"";
+        self.repeatOptions = [@[@(NO),@(NO),@(NO),@(NO),@(NO),@(NO),@(NO)] mutableCopy];
+    }
+    return self;
+}
+
+- (instancetype)initWithCurrentTime
+{
+    self = [self init];
+    if (self) {
+        NSDate *currentDate = [NSDate date];
+        NSCalendar *calendar = [NSCalendar currentCalendar];
+        NSDateComponents *components = [calendar components:(NSCalendarUnitHour | NSCalendarUnitMinute) fromDate:currentDate];
+        self.hour = [components hour];
+        self.minute = [components minute];
+    }
+    return self;
+}
+
+- (instancetype)initWithDictionary:(NSDictionary *)dict
+{
+    self = [super init];
+    if (self) {
+        self.hour = [dict[@"hour"] integerValue];
+        self.minute = [dict[@"minute"] integerValue];
+//        self.fireDate = [NSKeyedUnarchiver unarchiveObjectWithData:dict[@"fireDate"]];
+        self.label = dict[@"label"];
+        self.repeatOptions = [dict[@"repeatOptions"] mutableCopy];
+        self.snooze = [dict[@"snooze"] boolValue];
+        self.isEnabled = [dict[@"isEnabled"] boolValue];
+        self.isUnsaved = NO;
+    }
+    return self;
+}
+
+- (NSDictionary *)dictionaryRepresentation
+{
+    return @{
+        @"hour" : @(self.hour),
+        @"minute" : @(self.minute),
+        @"label" : self.label ? : @"",
+        @"repeatOptions" : [self.repeatOptions copy],
+        @"snooze" : @(self.snooze),
+        @"isEnabled" : @(self.isEnabled)
+    };
+}
+
+- (instancetype)mutableCopy
+{
+    AlarmInfo *newInfo = [[AlarmInfo alloc] init];
+    newInfo.hour = self.hour;
+    newInfo.minute = self.minute;
+    newInfo.label = self.label;
+    newInfo.repeatOptions = [NSMutableArray arrayWithArray:self.repeatOptions];
+    newInfo.snooze = self.snooze;
+    newInfo.isEnabled = self.isEnabled;
+    
+    return newInfo;
+}
+
+- (void)setHour:(NSInteger)hour
+{
+    if (hour < 0) {
+        _hour = 0;
+    } else if (hour > 23) {
+        _hour = 23;
+    } else {
+        _hour = hour;
+    }
+}
+
+- (void)setMinute:(NSInteger)minute
+{
+    if (minute < 0) {
+        _minute = 0;
+    } else if (minute > 59) {
+        _minute = 59;
+    } else {
+        _minute = minute;
+    }
+}
+
+@end
+
+
 @interface AlarmInfoArray ()
 
-@property (class, nonatomic, strong) NSMutableArray *infoArray;
+@property (nonatomic, strong) NSMutableArray<AlarmInfo *> *muArray;
 
 @end
 
 @implementation AlarmInfoArray
 
-static NSMutableArray *_infoArray = nil;
-
-+ (NSArray *)getInfoArray {
-    return [self.infoArray copy];
++ (instancetype)sharedArrray
+{
+    static AlarmInfoArray *array = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        array = [[AlarmInfoArray alloc] init];
+        array.muArray = [NSMutableArray array];
+        [array recoverDataIfNeeded];
+    });
+    return array;
 }
 
-+ (NSInteger)count {
-    return [self.infoArray count];
+- (void)recoverDataIfNeeded
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    if (![defaults objectForKey:ALARM_INFO_ARRAY]) {
+        [defaults setObject:[NSArray new] forKey:ALARM_INFO_ARRAY];
+        [defaults synchronize];
+    }
+    NSArray *dictArray = [defaults objectForKey:ALARM_INFO_ARRAY];
+    for (NSDictionary *dict in dictArray) {
+        AlarmInfo *info = [[AlarmInfo alloc] initWithDictionary:dict];
+        [self.muArray addObject:info];
+    }
 }
 
-+ (void)addAlarm:(NSDictionary *)info {
-    if (![info isKindOfClass:[NSDictionary class]] || [self.infoArray containsObject:info]) {
+- (void)addAlarm:(AlarmInfo *)info {
+    info.isUnsaved = NO;
+    if ([self.muArray containsObject:info]) {
         return;
     }
-    [self.infoArray addObject:info];
+    [self.muArray addObject:info];
     [self sortArray];
     [self updatePersistenceStore];
 }
 
-+ (void)removeAlarm:(NSDictionary *)info {
-    if (![info isKindOfClass:[NSDictionary class]]) {
-        NSLog(@"Incorrect class!");
+- (void)removeAlarm:(AlarmInfo *)info {
+    if (![info isKindOfClass:[AlarmInfo class]]) {
+        NSLog(@"remove alarm failed due to incorrect class");
         return;
     }
-    [self.infoArray removeObject:info];
+    [self.muArray removeObject:info];
     [self updatePersistenceStore];
 }
 
-+ (void)replaceAlarmAtIndex:(NSUInteger)index withNewInfo:(NSDictionary *)info {
-    if (![info isKindOfClass:[NSDictionary class]]) {
-        NSLog(@"Incorrect class!");
+- (void)replaceAlarmAtIndex:(NSUInteger)index withNewInfo:(AlarmInfo *)info {
+    if (![info isKindOfClass:[AlarmInfo class]]) {
+        NSLog(@"replace alarm failed due to incorrect class");
         return;
     }
-    [self.infoArray replaceObjectAtIndex:index withObject:info];
+    info.isUnsaved = YES;
+    [self.muArray replaceObjectAtIndex:index withObject:info];
     [self sortArray];
     [self updatePersistenceStore];
 }
 
-+ (void)sortArray {
-    [self.infoArray sortUsingComparator:^NSComparisonResult(NSDictionary *dict1, NSDictionary *dict2) {
-        // todo: following code will cause exception when some dict doesn't have expected paramater
-        NSInteger hour1 = [[dict1 objectForKey:@"hour"] integerValue];
-        NSInteger hour2 = [[dict1 objectForKey:@"hour"] integerValue];
-        NSInteger minute1 = [[dict1 objectForKey:@"minute"] integerValue];
-        NSInteger minute2 = [[dict1 objectForKey:@"minute"] integerValue];
-        if (hour1 != hour2) {
-            return hour1 < hour2 ? NSOrderedAscending : NSOrderedDescending;
+- (void)sortArray
+{
+    [self.muArray sortUsingComparator:^NSComparisonResult(AlarmInfo *info1, AlarmInfo *info2) {
+        if (info1.hour != info2.hour) {
+            return info1.hour < info2.hour ? NSOrderedAscending : NSOrderedDescending;
         }
-        if (minute1 != minute2) {
-            return minute1 < minute2 ? NSOrderedAscending : NSOrderedDescending;
+        if (info1.minute != info2.minute) {
+            return info1.minute < info2.minute ? NSOrderedAscending : NSOrderedDescending;
         }
         // todo: check repeat & label & ...
         return NSOrderedSame;
     }];
 }
 
-+ (void)updatePersistenceStore {
+- (void)updatePersistenceStore
+{
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:[self.infoArray copy] forKey:ALARM_INFO_ARRAY];
+    NSMutableArray *dictArray = [NSMutableArray array];
+    for (AlarmInfo *info in self.muArray) {
+        [dictArray addObject:[info dictionaryRepresentation]];
+    }
+    [defaults setObject:[dictArray copy] forKey:ALARM_INFO_ARRAY];
     [defaults synchronize];
 }
 
-+ (NSMutableArray *)infoArray {
-    if (!_infoArray) {
-        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        if (![defaults objectForKey:ALARM_INFO_ARRAY]) {
-            [defaults setObject:[NSArray new] forKey:ALARM_INFO_ARRAY];
-            [defaults synchronize];
-        }
-        NSArray *array = [defaults objectForKey:ALARM_INFO_ARRAY];
-        _infoArray = [array mutableCopy];
-    }
-    return _infoArray;
+- (NSUInteger)count 
+{
+    return [self.muArray count];
 }
 
-+ (void)setInfoArray:(NSMutableArray *)array {
-    _infoArray = array;
+- (AlarmInfo *)alarmAtIndex:(NSInteger)index
+{
+    if (index < 0 || index > [self count]) {
+        return nil;
+    }
+    return self.muArray[index];
 }
 
 @end

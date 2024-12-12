@@ -6,6 +6,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "AlarmInfoArray.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -22,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id<AddAlarmDelagate> delegate;
 
 - (void)showAlarmConfigWithCurrentTime;
-- (void)showAlarmConfigWithInfo:(NSDictionary *)info;
+- (void)showAlarmConfigWithInfo:(AlarmInfo *)info atIndex:(NSInteger)index;
 
 @end
 
